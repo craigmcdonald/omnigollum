@@ -209,8 +209,19 @@ module Omnigollum
       # Register helpers
       app.helpers Helpers
 
-      # Enable sinatra session support
-      app.set :sessions,  true
+      # Enable sinatra session support using Rack::Session::Cookie to support Unicorn
+
+      session_key = options[:session_key] || 'rack.session'
+      session_domain = options[:session_domain] || 'localhost'
+      session_path = options[:session_path] || '/'
+      session_expire = options[:session_expire] || 2592000
+      session_secret = options[:session_secret] || 'notsecret'
+
+      app.use Rack::Session::Cookie, :key => session_key,
+                           :domain => session_domain,
+                           :path => session_path,
+                           :expire_after => session_expire, # In seconds
+                           :secret => session_secret
 
       # Setup omniauth providers
       if !options[:providers].nil?
